@@ -1,0 +1,35 @@
+{
+  "bill_name": "Jan 30 2024 - Lunch",
+  "id": "acce352cc97c42f0b5147a84ddcd7485",
+  "people": [
+    {
+      "items": [
+        { "item": "Beer", "price": 6.5 },
+        { "item": "Burger", "price": 6.99 },
+        { "item": "Fries", "price": 4.33 }
+      ],
+      "name": "Dan",
+      "paid": true,
+      "payor": true
+    },
+    {
+      "items": [
+        { "item": "Beer", "price": 6.49 },
+        { "item": "Pizza", "price": 5.5 },
+        { "item": "Fries", "price": 4.33 }
+      ],
+      "name": "Eug",
+      "paid": false,
+      "payor": false
+    },
+    {
+      "items": [
+        { "item": "Pizza", "price": 5.49 },
+        { "item": "Fries", "price": 4.33 }
+      ],
+      "name": "Reb",
+      "paid": false,
+      "payor": false
+    }
+  ]
+}
