@@ -1,0 +1,27 @@
+{
+  "bill_name": "Kinka HH",
+  "people": [
+    { "name": "Kel", "paid": false, "payor": false },
+    { "name": "Chris", "paid": false, "payor": false },
+    { "name": "Jon", "paid": false, "payor": false },
+    { "name": "Dan", "paid": true, "payor": true }
+  ],
+  "bill": [
+    { "item": "BBQ Eel", "price": 15.5, "names": ["Kel"] },
+    {
+      "item": "Sake Bomb",
+      "price": 24,
+      "names": ["Dan", "Chris", "Jon", "Kel"]
+    },
+    { "item": "Sake Bomb", "price": 9, "names": ["Dan", "Chris", "Kel"] },
+    {
+      "item": "Edamame",
+      "price": 6.3,
+      "names": ["Dan", "Chris", "Jon", "Kel"]
+    },
+    { "item": "Karaage", "price": 12.3, "names": ["Dan", "Jon"] }
+  ],
+  "discount": 0,
+  "tax": 8.72,
+  "tip": 11.37
+}
