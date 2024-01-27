@@ -57,9 +57,9 @@ def create_bill():
 
     # create itemized bill items for each person
     for bill_item in content["bill"]:
-        names = bill_item["names"]  # ["Dan", "Eug"]
+        names = bill_item["names"]
         split_value_arr = ppaa(
-            bill_item["price"], len(names))  # [650, 649]
+            bill_item["price"], len(names))
         for n in range(len(names)):
             # update subtotals dict
             subtotals[names[n]] += split_value_arr[n]
