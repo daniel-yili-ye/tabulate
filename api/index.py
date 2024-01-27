@@ -13,11 +13,23 @@ def home():
 @app.route('/api', methods=["POST"])
 def create_bill():
 
-    def split_value(value, nr_variables):
-        cents = value
-        base = cents // nr_variables
-        rem = int(cents % nr_variables)
+    # Penny-Precise Allocation Algorithm
+    def ppaa(value, nr_variables):
+        base = value // nr_variables
+        rem = int(value % nr_variables)
         return ([base+1] * rem) + ([base] * (nr_variables-rem))
+
+    # Proportional Penny-Precise Allocation Algorithm
+    def pppaa(value, subtotals_dict, people_arr):
+        total = sum(list(subtotals_dict.values()))
+        qr_arr = list(map(lambda x: list(
+            divmod(value * subtotals_dict[x], total)) + [x], people_arr))
+        qr_arr.sort(key=lambda x: x[1], reverse=True)
+        leftover_cents = value - \
+            reduce(lambda x, y: (x[0] + y[0], 0, 0), qr_arr)[0]
+        for i in range(leftover_cents):
+            qr_arr[i][0] += 1
+        return qr_arr
 
     content = request.json
 
@@ -35,54 +47,31 @@ def create_bill():
 
     people = []
     people_index = {}
-    people_subtotal = {}
-    total = 0
+    subtotals = {}
     for p in range(len(response["people"])):
         name = response["people"][p]["name"]
         response["people"][p]["items"] = []
         people.append(name)
         people_index[name] = p
-        people_subtotal[name] = 0
+        subtotals[name] = 0
 
     # create itemized bill items for each person
     for bill_item in content["bill"]:
-        total += bill_item["price"]
         names = bill_item["names"]  # ["Dan", "Eug"]
-        split_value_arr = split_value(
+        split_value_arr = ppaa(
             bill_item["price"], len(names))  # [650, 649]
         for n in range(len(names)):
-            # update people_subtotal dict
-            people_subtotal[names[n]] += split_value_arr[n]
+            # update subtotals dict
+            subtotals[names[n]] += split_value_arr[n]
             item = {"item": bill_item["item"], "price": split_value_arr[n]}
             response["people"][people_index[names[n]]
                                ]["items"].append(item)
 
-    # allocate discount, tax, tip
-    # determine how much should be allocated to each person
-    discount_qr = list(map(lambda x: list(divmod(
-        content["discount"] * people_subtotal[x], total)) + [x], people))
-    tax_qr = list(map(lambda x: list(divmod(
-        content["tax"] * people_subtotal[x], total)) + [x], people))
-    tip_qr = list(map(lambda x: list(divmod(
-        content["tip"] * people_subtotal[x], total)) + [x], people))
-
-    discount_qr.sort(key=lambda x: x[1], reverse=True)
-    tax_qr.sort(key=lambda x: x[1], reverse=True)
-    tip_qr.sort(key=lambda x: x[1], reverse=True)
-
-    discount_leftover_cents = content["discount"] - \
-        reduce(lambda x, y: (x[0] + y[0], 0, 0), discount_qr)[0]
-    tax_leftover_cents = content["tax"] - \
-        reduce(lambda x, y: (x[0] + y[0], 0, 0), tax_qr)[0]
-    tip_leftover_cents = content["tip"] - \
-        reduce(lambda x, y: (x[0] + y[0], 0, 0), tip_qr)[0]
-
-    for i in range(discount_leftover_cents):
-        discount_qr[i][0] += 1
-    for i in range(tax_leftover_cents):
-        tax_qr[i][0] += 1
-    for i in range(tip_leftover_cents):
-        tip_qr[i][0] += 1
+    # Proportional Penny-Precise Allocation Algorithm
+    # allocate discount, tax, tip to each person
+    discount_qr = pppaa(content["discount"], subtotals, people)
+    tax_qr = pppaa(content["tax"], subtotals, people)
+    tip_qr = pppaa(content["tip"], subtotals, people)
 
     for discount in discount_qr:
         response["people"][people_index[discount[2]]]["discount"] = discount[0]
