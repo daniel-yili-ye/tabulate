@@ -106,7 +106,7 @@ export default function Home() {
           </DialogContent>
         </Dialog>
       </div>
-      <Button type="submit">Tabulate!</Button>
+      <Button type="submit">Next -></Button>
     </div>
   );
 }
