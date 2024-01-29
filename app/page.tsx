@@ -74,6 +74,38 @@ export default function Home() {
           </DialogContent>
         </Dialog>
       </div>
+      <div className="grid w-full max-w-sm items-center gap-1.5">
+        <Label htmlFor="people">People</Label>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">+ Add Name</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Name</DialogTitle>
+              <DialogDescription>
+                Provide your name(s) here. You're party cannot have identical
+                names.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="person-name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="person-name"
+                  placeholder="ex. Joe Rogan"
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit">Add</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
       <Button type="submit">Tabulate!</Button>
     </div>
   );
