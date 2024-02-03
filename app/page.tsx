@@ -1,18 +1,78 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+"use client";
+
 import { ModeToggle } from "@/components/ui/mode-toggle";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+
+const FormSchema = z.object({
+  bill_name: z.string().min(1, {
+    message: "Bill Name must be at least 1 characters.",
+  }),
+  bill_items: z.array(
+    z.object({
+      bill_item_name: z
+        .string()
+        .min(1, { message: "Bill Item must be at least 1 characters." }),
+      bill_item_price: z.coerce
+        .number({
+          required_error: "Bill Item Price is required",
+          invalid_type_error: "Bill Item Price must be a number",
+        })
+        .multipleOf(0.01),
+    })
+  ),
+  names: z.array(
+    z.object({
+      name: z.string().min(1, { message: "Name must be at least 1 character" }),
+    })
+  ),
+});
+
 export default function Home() {
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      bill_name: "",
+      bill_items: [{ bill_item_name: "", bill_item_price: 0 }],
+      names: [{ name: "" }],
+    },
+  });
+
+  const { fields: billItemFields, append: billItemsAppend } = useFieldArray({
+    name: "bill_items",
+    control: form.control,
+  });
+
+  const { fields: namesFields, append: namesAppend } = useFieldArray({
+    name: "names",
+    control: form.control,
+  });
+
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    toast({
+      title: "You submitted the following values:",
+      description: (
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+        </pre>
+      ),
+    });
+  }
+
   return (
     <div className="p-5 space-y-3">
       <div className="flex space-x-3 items-center">
@@ -24,89 +84,66 @@ export default function Home() {
         bills with discounts, taxes, and tips. Say goodbye to complicated
         spreadsheets 👋!
       </p>
-      <div className="grid w-full max-w-sm items-center gap-1.5">
-        <Label htmlFor="name">Bill Name</Label>
-        <Input
-          id="bill-name"
-          placeholder="ex. Thursday Happy Hour"
-          type="text"
-        />
-      </div>
-      <div className="grid w-full max-w-sm items-center gap-1.5">
-        <Label htmlFor="bill-items">Bill Items</Label>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">+ Add Item</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Item</DialogTitle>
-              <DialogDescription>
-                Provide your item name and price details here. Click add once
-                you're done.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="item-name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="item-name"
-                  placeholder="ex. PBR Pitcher"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="price" className="text-right">
-                  Price
-                </Label>
-                <Input
-                  id="price"
-                  placeholder="ex. 19.99"
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Add</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-      <div className="grid w-full max-w-sm items-center gap-1.5">
-        <Label htmlFor="people">People</Label>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">+ Add Name</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Name</DialogTitle>
-              <DialogDescription>
-                Provide your name(s) here. You're party cannot have identical
-                names.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="person-name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="person-name"
-                  placeholder="ex. Joe Rogan"
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Add</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-      <Button type="submit">Next -></Button>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="w-2/3 space-y-6"
+        >
+          <FormField
+            control={form.control}
+            name="bill_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bill Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="ex. Thursday Happy Hour" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="bill_items"
+            render={() => (
+              <FormItem>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    console.log(billItemFields);
+                    return billItemsAppend({
+                      bill_item_name: "",
+                      bill_item_price: 0,
+                    });
+                  }}
+                >
+                  + Add Bill Item
+                </Button>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="names"
+            render={() => (
+              <FormItem>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    console.log(namesFields);
+                    return namesAppend({
+                      name: "",
+                    });
+                  }}
+                >
+                  + Add Names
+                </Button>
+              </FormItem>
+            )}
+          />
+          <Button type="submit">Submit</Button>
+        </form>
+      </Form>
     </div>
   );
 }
