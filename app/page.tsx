@@ -102,6 +102,45 @@ export default function Home() {
               </FormItem>
             )}
           />
+          <div>
+            {billItemFields.map((field, index) => {
+              return (
+                <div key={field.id}>
+                  <div className="flex gap-x-3">
+                    <FormField
+                      control={form.control}
+                      name={`bill_items.${index}.bill_item_name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Bill Item Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="ex. Sapporo Pitcher"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`bill_items.${index}.bill_item_price`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Bill Item Price</FormLabel>
+                          <FormControl>
+                            <Input placeholder="ex. 12.99" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
           <FormField
             control={form.control}
             name="bill_items"
@@ -110,7 +149,6 @@ export default function Home() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    console.log(billItemFields);
                     return billItemsAppend({
                       bill_item_name: "",
                       bill_item_price: 0,
@@ -130,7 +168,6 @@ export default function Home() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    console.log(namesFields);
                     return namesAppend({
                       name: "",
                     });
