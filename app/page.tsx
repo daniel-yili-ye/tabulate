@@ -28,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Divide } from "lucide-react";
 
 const FormSchema = z.object({
   bill_name: z.string().min(1, {
@@ -99,6 +100,19 @@ export default function Home() {
     });
   }
 
+  function onSubmit2(data: any) {
+    console.log(data);
+
+    toast({
+      title: "You submitted the following values:",
+      description: (
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+        </pre>
+      ),
+    });
+  }
+
   const { fields: billItemFields, append: billItemsAppend } = useFieldArray({
     name: "bill_items",
     control: form.control,
@@ -136,6 +150,9 @@ export default function Home() {
             )}
           />
           <div className="grid w-full items-center gap-3">
+            {billItemFields.map((item) => {
+              return <div>{item.bill_item_name}</div>;
+            })}
             <Label htmlFor="bill-items">Bill Items</Label>
             <Dialog>
               <DialogTrigger asChild>
@@ -150,7 +167,10 @@ export default function Home() {
                 </DialogHeader>
                 <Form {...formItem}>
                   <form
-                    onSubmit={formItem.handleSubmit(onSubmit)}
+                    onSubmit={(e) => {
+                      e.stopPropagation();
+                      formItem.handleSubmit(onSubmit)(e);
+                    }}
                     className="space-y-6"
                   >
                     <div className="grid grid-cols-2 gap-4">
@@ -203,7 +223,11 @@ export default function Home() {
                 </DialogHeader>
                 <Form {...formName}>
                   <form
-                    onSubmit={formName.handleSubmit(onSubmit)}
+                    onSubmit={(e) => {
+                      e.stopPropagation();
+
+                      formName.handleSubmit(onSubmit)(e);
+                    }}
                     className="space-y-6"
                   >
                     <FormField
