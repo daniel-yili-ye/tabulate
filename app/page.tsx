@@ -28,31 +28,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Divide } from "lucide-react";
 
-const FormSchema = z.object({
-  bill_name: z.string().min(1, {
-    message: "Bill Name must be at least 1 characters.",
-  }),
-  bill_items: z.array(
-    z.object({
-      bill_item_name: z
-        .string()
-        .min(1, { message: "Bill Item must be at least 1 characters." }),
-      bill_item_price: z.coerce
-        .number({
-          required_error: "Bill Item Price is required",
-          invalid_type_error: "Bill Item Price must be a number",
-        })
-        .multipleOf(0.01),
-    })
-  ),
-  names: z.array(
-    z.object({
-      name: z.string().min(1, { message: "Name must be at least 1 character" }),
-    })
-  ),
-});
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const FormSchemaItem = z.object({
   bill_item_name: z
@@ -68,6 +52,14 @@ const FormSchemaItem = z.object({
 
 const FormSchemaName = z.object({
   name: z.string().min(1, { message: "Name must be at least 1 character" }),
+});
+
+const FormSchema = z.object({
+  bill_name: z.string().min(1, {
+    message: "Bill Name must be at least 1 characters.",
+  }),
+  bill_items: z.array(FormSchemaItem),
+  names: z.array(FormSchemaName),
 });
 
 export default function Home() {
@@ -100,17 +92,12 @@ export default function Home() {
     });
   }
 
-  function onSubmit2(data: any) {
-    console.log(data);
+  function onAddItem(data: any) {
+    billItemsAppend(data);
+  }
 
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+  function onAddName(data: any) {
+    namesAppend(data);
   }
 
   const { fields: billItemFields, append: billItemsAppend } = useFieldArray({
@@ -150,10 +137,18 @@ export default function Home() {
             )}
           />
           <div className="grid w-full items-center gap-3">
-            {billItemFields.map((item) => {
-              return <div>{item.bill_item_name}</div>;
-            })}
             <Label htmlFor="bill-items">Bill Items</Label>
+            {billItemFields.map((item) => {
+              return (
+                <Card className="px-3 py-2 flex justify-between items-center">
+                  <div>{item.bill_item_name}</div>
+                  <div className="flex items-center space-x-3">
+                    <div>${item.bill_item_price}</div>
+                    <Button>Remove</Button>
+                  </div>
+                </Card>
+              );
+            })}
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline">+ Add Item</Button>
@@ -169,7 +164,7 @@ export default function Home() {
                   <form
                     onSubmit={(e) => {
                       e.stopPropagation();
-                      formItem.handleSubmit(onSubmit)(e);
+                      formItem.handleSubmit(onAddItem)(e);
                     }}
                     className="space-y-6"
                   >
@@ -210,6 +205,14 @@ export default function Home() {
           </div>
           <div className="grid w-full items-center gap-3">
             <Label htmlFor="people">People</Label>
+            {namesFields.map((item) => {
+              return (
+                <Card className="px-3 py-2 flex justify-between items-center">
+                  <div>{item.name}</div>
+                  <Button>Remove</Button>
+                </Card>
+              );
+            })}
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline">+ Add Name</Button>
@@ -226,7 +229,7 @@ export default function Home() {
                     onSubmit={(e) => {
                       e.stopPropagation();
 
-                      formName.handleSubmit(onSubmit)(e);
+                      formName.handleSubmit(onAddName)(e);
                     }}
                     className="space-y-6"
                   >
