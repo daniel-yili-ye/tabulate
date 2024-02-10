@@ -38,6 +38,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 const FormSchemaItem = z.object({
   bill_item_name: z
     .string()
@@ -111,148 +121,178 @@ export default function Home() {
   });
 
   return (
-    <div className="p-5 space-y-3">
-      <div className="flex space-x-3 items-center justify-between	">
-        <h1 className="scroll-m-20 text-5xl font-extrabold">Tabulate</h1>
-        <ModeToggle />
+    <div className="flex justify-center">
+      <div className="p-5 space-y-3 sm:w-[36rem] sm:p-10">
+        <div className="flex space-x-3 items-center justify-between	">
+          <h1 className="scroll-m-20 text-5xl font-extrabold">Tabulate</h1>
+          <ModeToggle />
+        </div>
+        <p className="text-muted-foreground">
+          Effortlessly split the tab with friends. Perfect for splitting
+          itemized bills with discounts, taxes, and tips. Say goodbye to
+          complicated spreadsheets 👋!
+        </p>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="bill_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bill Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex. Thursday Happy Hour" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid w-full items-center gap-3">
+              <Label htmlFor="bill-items">Items</Label>
+              {billItemFields.length > 0 ? (
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {billItemFields.map((item) => (
+                        <TableRow>
+                          <TableCell className="font-medium">
+                            {item.bill_item_name}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ${item.bill_item_price.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              ) : (
+                <></>
+              )}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">+ Add Item</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Item</DialogTitle>
+                    <DialogDescription>
+                      Provide your item name and price details here.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...formItem}>
+                    <form
+                      onSubmit={(e) => {
+                        e.stopPropagation();
+                        formItem.handleSubmit(onAddItem)(e);
+                      }}
+                      className="space-y-6"
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          name="bill_item_name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Bill Item Name</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="ex. Sapporo Pitcher"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          name="bill_item_price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Bill Item Price</FormLabel>
+                              <FormControl>
+                                <Input placeholder="ex. 12.99" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <Button type="submit">Add</Button>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="grid w-full items-center gap-3">
+              <Label htmlFor="people">People</Label>
+              {namesFields.length > 0 ? (
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {namesFields.map((item) => (
+                        <TableRow>
+                          <TableCell className="font-medium">
+                            {item.name}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              ) : (
+                <></>
+              )}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">+ Add People</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Name</DialogTitle>
+                    <DialogDescription>
+                      Provide your name(s) here.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...formName}>
+                    <form
+                      onSubmit={(e) => {
+                        e.stopPropagation();
+                        formName.handleSubmit(onAddName)(e);
+                      }}
+                      className="space-y-6"
+                    >
+                      <FormField
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="ex. Joe Rogan" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit">Add</Button>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
       </div>
-      <p className="text-muted-foreground">
-        Effortlessly split the tab with friends. Perfect for splitting itemized
-        bills with discounts, taxes, and tips. Say goodbye to complicated
-        spreadsheets 👋!
-      </p>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="bill_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bill Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="ex. Thursday Happy Hour" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="grid w-full items-center gap-3">
-            <Label htmlFor="bill-items">Bill Items</Label>
-            {billItemFields.map((item) => {
-              return (
-                <Card className="px-3 py-2 flex justify-between items-center">
-                  <div>{item.bill_item_name}</div>
-                  <div className="flex items-center space-x-3">
-                    <div>${item.bill_item_price}</div>
-                    <Button>Remove</Button>
-                  </div>
-                </Card>
-              );
-            })}
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">+ Add Item</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Item</DialogTitle>
-                  <DialogDescription>
-                    Provide your item name and price details here.
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...formItem}>
-                  <form
-                    onSubmit={(e) => {
-                      e.stopPropagation();
-                      formItem.handleSubmit(onAddItem)(e);
-                    }}
-                    className="space-y-6"
-                  >
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        name="bill_item_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Bill Item Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="ex. Sapporo Pitcher"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        name="bill_item_price"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Bill Item Price</FormLabel>
-                            <FormControl>
-                              <Input placeholder="ex. 12.99" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <Button type="submit">Add</Button>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="grid w-full items-center gap-3">
-            <Label htmlFor="people">People</Label>
-            {namesFields.map((item) => {
-              return (
-                <Card className="px-3 py-2 flex justify-between items-center">
-                  <div>{item.name}</div>
-                  <Button>Remove</Button>
-                </Card>
-              );
-            })}
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">+ Add Name</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Name</DialogTitle>
-                  <DialogDescription>
-                    Provide your name(s) here.
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...formName}>
-                  <form
-                    onSubmit={(e) => {
-                      e.stopPropagation();
-
-                      formName.handleSubmit(onAddName)(e);
-                    }}
-                    className="space-y-6"
-                  >
-                    <FormField
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input placeholder="ex. Joe Rogan" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit">Add</Button>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <Button type="submit">Submit</Button>
-        </form>
-      </Form>
     </div>
   );
 }
