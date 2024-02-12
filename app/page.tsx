@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -48,6 +49,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 const FormSchemaItem = z.object({
   bill_item_name: z
     .string()
@@ -56,6 +65,16 @@ const FormSchemaItem = z.object({
     .number({
       required_error: "Bill Item Price is required",
       invalid_type_error: "Bill Item Price must be a number",
+    })
+    .multipleOf(0.01),
+});
+
+const FormSchemaOtherItem = z.object({
+  bill_other_item_name: z.string(),
+  bill_other_item_amt: z.coerce
+    .number({
+      required_error: "Amount is required",
+      invalid_type_error: "Amount must be a number",
     })
     .multipleOf(0.01),
 });
@@ -69,6 +88,7 @@ const FormSchema = z.object({
     message: "Bill Name must be at least 1 characters.",
   }),
   bill_items: z.array(FormSchemaItem),
+  bill_other_items: z.array(FormSchemaOtherItem),
   names: z.array(FormSchemaName),
 });
 
@@ -78,16 +98,38 @@ export default function Home() {
     defaultValues: {
       bill_name: "",
       bill_items: [],
+      bill_other_items: [],
       names: [],
     },
   });
 
+  const formItemDefaultValues = {
+    bill_item_name: "",
+    // bill_item_price: 0,
+  };
+
   const formItem = useForm<z.infer<typeof FormSchemaItem>>({
     resolver: zodResolver(FormSchemaItem),
+    defaultValues: formItemDefaultValues,
   });
+
+  const formOtherItemDefaultValues = {
+    // bill_other_item_name: "",
+    // bill_other_item_amt: 0,
+  };
+
+  const formOtherItem = useForm<z.infer<typeof FormSchemaOtherItem>>({
+    resolver: zodResolver(FormSchemaOtherItem),
+    defaultValues: formOtherItemDefaultValues,
+  });
+
+  const formNameDefaultValues = {
+    name: "",
+  };
 
   const formName = useForm<z.infer<typeof FormSchemaName>>({
     resolver: zodResolver(FormSchemaName),
+    defaultValues: formNameDefaultValues,
   });
 
   function onSubmit(data: any) {
@@ -104,16 +146,29 @@ export default function Home() {
 
   function onAddItem(data: any) {
     billItemsAppend(data);
+    // formItem.reset(formItemDefaultValues);
+  }
+
+  function onAddOtherItem(data: any) {
+    otherItemAppend(data);
+    // formOtherItem.reset(formOtherItemDefaultValues);
   }
 
   function onAddName(data: any) {
     namesAppend(data);
+    formName.reset(formNameDefaultValues);
   }
 
   const { fields: billItemFields, append: billItemsAppend } = useFieldArray({
     name: "bill_items",
     control: form.control,
   });
+
+  const { fields: billOtherItemFields, append: otherItemAppend } =
+    useFieldArray({
+      name: "bill_other_items",
+      control: form.control,
+    });
 
   const { fields: namesFields, append: namesAppend } = useFieldArray({
     name: "names",
@@ -165,7 +220,27 @@ export default function Home() {
                             {item.bill_item_name}
                           </TableCell>
                           <TableCell className="text-right">
-                            ${item.bill_item_price.toFixed(2)}
+                            {item.bill_item_price.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              ) : (
+                <></>
+              )}
+              {billOtherItemFields.length > 0 ? (
+                <Card>
+                  <Table>
+                    <TableBody>
+                      {billOtherItemFields.map((item) => (
+                        <TableRow>
+                          <TableCell className="font-medium">
+                            {item.bill_other_item_name}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {item.bill_other_item_amt.toFixed(2)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -177,11 +252,11 @@ export default function Home() {
               )}
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline">+ Add Item</Button>
+                  <Button variant="outline">+ Add Bill Item</Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[42rem]">
                   <DialogHeader>
-                    <DialogTitle>Item</DialogTitle>
+                    <DialogTitle>Bill Item</DialogTitle>
                     <DialogDescription>
                       Provide your item name and price details here.
                     </DialogDescription>
@@ -228,7 +303,72 @@ export default function Home() {
                   </Form>
                 </DialogContent>
               </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">+ Add Tax / Tip / Discount</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[42rem]">
+                  <DialogHeader>
+                    <DialogTitle>Tax / Tip / Discount</DialogTitle>
+                    <DialogDescription>
+                      Provide your item and amount details here.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...formOtherItem}>
+                    <form
+                      onSubmit={(e) => {
+                        e.stopPropagation();
+                        formOtherItem.handleSubmit(onAddOtherItem)(e);
+                      }}
+                      className="space-y-6"
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          name="bill_other_item_name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Type</FormLabel>
+                              <FormControl>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Tax">Tax</SelectItem>
+                                    <SelectItem value="Tip">Tip</SelectItem>
+                                    <SelectItem value="Discount">
+                                      Discount
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          name="bill_other_item_amt"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Amount</FormLabel>
+                              <FormControl>
+                                <Input placeholder="ex. 12.99" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <Button type="submit">Add</Button>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
             </div>
+
             <div className="grid w-full items-center gap-3">
               <Label htmlFor="people">People</Label>
               {namesFields.length > 0 ? (
@@ -257,7 +397,7 @@ export default function Home() {
                 <DialogTrigger asChild>
                   <Button variant="outline">+ Add People</Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[42rem]">
                   <DialogHeader>
                     <DialogTitle>Name</DialogTitle>
                     <DialogDescription>
