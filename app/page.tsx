@@ -47,6 +47,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table";
 
 import {
@@ -66,7 +67,8 @@ const FormSchemaItem = z.object({
       required_error: "Bill Item Price is required",
       invalid_type_error: "Bill Item Price must be a number",
     })
-    .multipleOf(0.01),
+    .multipleOf(0.01)
+    .positive(),
 });
 
 const FormSchemaOtherItem = z.object({
@@ -76,7 +78,8 @@ const FormSchemaOtherItem = z.object({
       required_error: "Amount is required",
       invalid_type_error: "Amount must be a number",
     })
-    .multipleOf(0.01),
+    .multipleOf(0.01)
+    .positive(),
 });
 
 const FormSchemaName = z.object({
@@ -105,7 +108,7 @@ export default function Home() {
 
   const formItemDefaultValues = {
     bill_item_name: "",
-    // bill_item_price: 0,
+    bill_item_price: "",
   };
 
   const formItem = useForm<z.infer<typeof FormSchemaItem>>({
@@ -114,8 +117,7 @@ export default function Home() {
   });
 
   const formOtherItemDefaultValues = {
-    // bill_other_item_name: "",
-    // bill_other_item_amt: 0,
+    bill_other_item_amt: "",
   };
 
   const formOtherItem = useForm<z.infer<typeof FormSchemaOtherItem>>({
@@ -145,17 +147,33 @@ export default function Home() {
   }
 
   function onAddItem(data: any) {
+    console.log(data);
     billItemsAppend(data);
-    // formItem.reset(formItemDefaultValues);
+    toast({
+      description: `✅ ${data.bill_item_name} $${data.bill_item_price.toFixed(
+        2
+      )} added!`,
+    });
+    formItem.reset(formItemDefaultValues);
   }
 
   function onAddOtherItem(data: any) {
     otherItemAppend(data);
-    // formOtherItem.reset(formOtherItemDefaultValues);
+    toast({
+      description: `💰 ${data.bill_other_item_name} ${
+        data.bill_other_item_name === "Discount"
+          ? "($" + data.bill_other_item_amt.toFixed(2) + ")"
+          : "$" + data.bill_other_item_amt.toFixed(2)
+      }  added!`,
+    });
+    formOtherItem.reset(formOtherItemDefaultValues);
   }
 
   function onAddName(data: any) {
     namesAppend(data);
+    toast({
+      description: `🧑 ${data.name} added!`,
+    });
     formName.reset(formNameDefaultValues);
   }
 
@@ -207,12 +225,12 @@ export default function Home() {
               {billItemFields.length > 0 ? (
                 <Card>
                   <Table>
-                    <TableHeader>
+                    {/* <TableHeader>
                       <TableRow>
                         <TableHead>Item</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                       </TableRow>
-                    </TableHeader>
+                    </TableHeader> */}
                     <TableBody>
                       {billItemFields.map((item) => (
                         <TableRow>
@@ -220,7 +238,7 @@ export default function Home() {
                             {item.bill_item_name}
                           </TableCell>
                           <TableCell className="text-right">
-                            {item.bill_item_price.toFixed(2)}
+                            ${item.bill_item_price.toFixed(2)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -240,7 +258,9 @@ export default function Home() {
                             {item.bill_other_item_name}
                           </TableCell>
                           <TableCell className="text-right">
-                            {item.bill_other_item_amt.toFixed(2)}
+                            {item.bill_other_item_name === "Discount"
+                              ? `($${item.bill_other_item_amt.toFixed(2)})`
+                              : `$${item.bill_other_item_amt.toFixed(2)}`}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -374,11 +394,11 @@ export default function Home() {
               {namesFields.length > 0 ? (
                 <Card>
                   <Table>
-                    <TableHeader>
+                    {/* <TableHeader>
                       <TableRow>
                         <TableHead>Name</TableHead>
                       </TableRow>
-                    </TableHeader>
+                    </TableHeader> */}
                     <TableBody>
                       {namesFields.map((item) => (
                         <TableRow>
