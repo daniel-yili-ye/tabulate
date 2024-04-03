@@ -88,7 +88,7 @@ export default function Bill() {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
-    setState({ state: state.step + 1, ...values });
+    setState({ step: state.step + 1, ...values });
   }
 
   const { fields: peopleFields, append: peopleAppend } = useFieldArray({
@@ -117,8 +117,8 @@ export default function Bill() {
           )}
         />
         <div>
-          {billItemsFields.map((field, index) => (
-            <div className="flex space-x-2" key={field.id}>
+          {billItemsFields.map((element, index) => (
+            <div className="flex space-x-2" key={element.id}>
               <FormField
                 control={form.control}
                 name={`bill_items.${index}.item`}
@@ -201,10 +201,10 @@ export default function Bill() {
           )}
         />
         <div>
-          {peopleFields.map((field, index) => (
+          {peopleFields.map((element, index) => (
             <FormField
               control={form.control}
-              key={field.id}
+              key={element.id}
               name={`people.${index}.name`}
               render={({ field }) => (
                 <FormItem>

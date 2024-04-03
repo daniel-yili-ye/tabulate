@@ -22,7 +22,6 @@ export default function Home() {
             complicated spreadsheets 👋!
           </p>
         </div>
-
         {state.step === 0 ? <Bill></Bill> : null}
         {state.step === 1 ? <Allocation></Allocation> : null}
         {state.step === 2 ? <Summary></Summary> : null}
