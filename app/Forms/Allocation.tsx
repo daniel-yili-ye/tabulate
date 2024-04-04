@@ -26,9 +26,8 @@ const optionSchema = z.object({
 });
 
 const formSchema = z.object({
-  people: z.array(optionSchema).min(1),
+  item_allocation: z.array(z.object({ people: z.array(optionSchema).min(1) })),
 });
-
 export default function Allocation() {
   const [state, setState] = useAppState();
 
@@ -47,8 +46,9 @@ export default function Allocation() {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
-    // setState({ step: state.step + 1, ...values });
+    setState({ step: state.step + 1, ...values });
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -56,13 +56,13 @@ export default function Allocation() {
           <FormField
             control={form.control}
             key={index}
-            name={`people.${index}`}
+            name={`item_allocation.${index}.people`}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{element.item}</FormLabel>
                 <FormControl>
                   <MultipleSelector
-                    value={field.value
+                    value={field.value}
                     onChange={field.onChange}
                     defaultOptions={options}
                     placeholder="Select the people who shared this item..."
@@ -78,6 +78,7 @@ export default function Allocation() {
             )}
           />
         ))}
+
         <Button className="!mt-6" type="submit">
           Next
         </Button>
